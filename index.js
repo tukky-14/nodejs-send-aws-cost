@@ -29,6 +29,7 @@ exports.handler = async (event) => {
         const data = await costExplorer.getCostAndUsage(params).promise();
 
         // サービス別コストを整形して出力
+        let totalCost = 0;
         console.log('AWS Cost Report:');
         data.ResultsByTime.forEach((result) => {
             console.log(`Date Range: ${result.TimePeriod.Start} to ${result.TimePeriod.End}`);
@@ -36,6 +37,7 @@ exports.handler = async (event) => {
                 const serviceName = group.Keys[0];
                 const amount = group.Metrics.UnblendedCost.Amount;
                 const unit = group.Metrics.UnblendedCost.Unit;
+                totalCost += parseFloat(amount);
                 if (amount < 0.01) return;
                 console.log(`${serviceName}: $${parseFloat(amount).toFixed(2)} ${unit}`);
             });
@@ -43,6 +45,7 @@ exports.handler = async (event) => {
                 console.log('No cost data available for this period.');
             }
         });
+        console.log(`Total Cost: $${totalCost.toFixed(2)}`);
 
         return {
             statusCode: 200,
