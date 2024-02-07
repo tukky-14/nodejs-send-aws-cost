@@ -30,22 +30,26 @@ exports.handler = async (event) => {
 
         // サービス別コストを整形して出力
         let totalCost = 0;
-        console.log('AWS Cost Report:');
+        const outputMessage = [];
+        outputMessage.push('【AWS Cost Report】');
         data.ResultsByTime.forEach((result) => {
-            console.log(`Date Range: ${result.TimePeriod.Start} to ${result.TimePeriod.End}`);
+            outputMessage.push(`${result.TimePeriod.Start} ~ ${result.TimePeriod.End}\n`);
+
             result.Groups.forEach((group) => {
                 const serviceName = group.Keys[0];
                 const amount = group.Metrics.UnblendedCost.Amount;
                 const unit = group.Metrics.UnblendedCost.Unit;
                 totalCost += parseFloat(amount);
                 if (amount < 0.01) return;
-                console.log(`${serviceName}: $${parseFloat(amount).toFixed(2)} ${unit}`);
+
+                outputMessage.push(`${serviceName}: $${parseFloat(amount).toFixed(2)} ${unit}`);
             });
             if (result.Groups.length === 0) {
                 console.log('No cost data available for this period.');
             }
         });
-        console.log(`Total Cost: $${totalCost.toFixed(2)}`);
+        outputMessage.push(`\n💰Total Cost: $${totalCost.toFixed(2)} USD`);
+        console.log(outputMessage.join('\n'));
 
         return {
             statusCode: 200,
