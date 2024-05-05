@@ -1,11 +1,11 @@
-const AWS = require('aws-sdk');
-const axios = require('axios');
+import AWS from 'aws-sdk';
+import axios from 'axios';
 const costExplorer = new AWS.CostExplorer({ region: 'ap-northeast-1' });
 
 const BASE_URL = 'https://notify-api.line.me/api/notify';
 const LINE_TOKEN = process.env.LINE_TOKEN;
 
-exports.handler = async (event) => {
+export const handler = async (event) => {
     // 今月の初日を計算
     const startDate = new Date();
     startDate.setDate(1); // 月の初日に設定
@@ -30,6 +30,7 @@ exports.handler = async (event) => {
     };
 
     try {
+        // AWS Cost Explorer からコストデータを取得
         const data = await costExplorer.getCostAndUsage(params).promise();
 
         // サービス別コストを整形して出力
@@ -44,6 +45,8 @@ exports.handler = async (event) => {
                 const amount = group.Metrics.UnblendedCost.Amount;
                 const unit = group.Metrics.UnblendedCost.Unit;
                 totalCost += parseFloat(amount);
+
+                // 0.01 USD 未満の場合は表示しない
                 if (amount < 0.01) return;
 
                 outputMessage.push(`${serviceName}: $${parseFloat(amount).toFixed(2)}`);
@@ -52,6 +55,8 @@ exports.handler = async (event) => {
                 console.log('No cost data available for this period.');
             }
         });
+
+        // 合計金額を追加
         outputMessage.push(`\n💰Total Cost: $${totalCost.toFixed(2)} USD`);
 
         // コンソールに出力
