@@ -50,3 +50,18 @@
 
 -   Lambda 関数に使用される IAM ロールは、その操作に必要な最小限のアクセス権限を持つようにしてください。
 -   LINE Notify アクセストークンを保護し、コードや公開可能なプラットフォームで露出させないようにしてください。
+
+### コマンド
+
+圧縮
+
+```bash
+# linux/mac
+zip -r function_name.zip .
+
+# windows command prompt
+powershell Compress-Archive -Path * -DestinationPath function_name.zip
+
+# windows powershell
+Compress-Archive -Path * -DestinationPath function_name.zip
+```
